@@ -1,0 +1,39 @@
+package com.gikk.chat.auto;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import com.gikk.Chat;
+import com.gikk.chat.AbstractChatCommand;
+import com.gikk.chat.conditions.CooldownPerCommand;
+import com.gikk.chat.conditions.IsModerator;
+import com.gikk.twirk.types.emote.Emote;
+import com.gikk.twirk.types.users.TwitchUser;
+
+public class CommandsCommand extends AbstractChatCommand
+{
+	private static final String COMMAND = "!commands";
+
+	private final Set<String> commandWords = new HashSet<>();
+
+	public CommandsCommand()
+	{
+		addCondition(new CooldownPerCommand(5 * 1000)); // 5 seconds
+		addCondition(new IsModerator());
+		commandWords.add(COMMAND);
+	}
+
+	@Override
+	public Set<String> getCommandWords()
+	{
+		return commandWords;
+	}
+
+	@Override
+	public boolean performCommand(String command, TwitchUser sender, String content, List<Emote> emotes)
+	{
+		Chat.GET().broadcast(Chat.GET().getKeywords());
+		return true;
+	}
+}
