@@ -1,36 +1,32 @@
 package com.gikk.chat.auto;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import com.gikk.Chat;
+import com.gikk.ChatSingleton;
 import com.gikk.chat.AbstractChatCommand;
 import com.gikk.chat.conditions.IsOwner;
 import com.gikk.twirk.types.emote.Emote;
 import com.gikk.twirk.types.users.TwitchUser;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-public class PraiseBroadcasterCommand extends AbstractChatCommand
-{
-	private static final String COMMAND = "!owner";
-	private final Set<String> commandWords = new HashSet<>();
+public class PraiseBroadcasterCommand extends AbstractChatCommand {
 
-	public PraiseBroadcasterCommand()
-	{
-		addCondition(new IsOwner());
-		commandWords.add(COMMAND);
-	}
+    private static final String COMMAND = "!owner";
+    private final Set<String> commandWords = new HashSet<>();
 
-	@Override
-	public Set<String> getCommandWords()
-	{
-		return commandWords;
-	}
+    public PraiseBroadcasterCommand() {
+        addCondition(new IsOwner());
+        commandWords.add(COMMAND);
+    }
 
-	@Override
-	public boolean performCommand(String command, TwitchUser sender, String content, List<Emote> emotes)
-	{
-		Chat.GET().broadcast("Praise be " + sender.getDisplayName());
-		return true;
-	}
+    @Override
+    public Set<String> getCommandWords() {
+        return commandWords;
+    }
+
+    @Override
+    public boolean performCommand(String command, TwitchUser sender, String content, List<Emote> emotes) {
+        ChatSingleton.GET().broadcast("Praise be " + sender.getDisplayName());
+        return true;
+    }
 }

@@ -3,45 +3,40 @@ package com.gikk.chat.conditions;
 import com.gikk.twirk.enums.USER_TYPE;
 import com.gikk.twirk.types.users.TwitchUser;
 
-/**Abstract class for conditions that does not apply to moderators
+/**
+ * Abstract class for conditions that does not apply to moderators
  *
  * @author Gikkman
  */
-public abstract class AbstractFreeForMod implements ICondition
-{
-	private final boolean active;
+public abstract class AbstractFreeForMod implements ICondition {
 
-	public AbstractFreeForMod()
-	{
-		this(true);
-	}
+    private final boolean active;
 
-	public AbstractFreeForMod(boolean active)
-	{
-		this.active = active;
-	}
+    public AbstractFreeForMod() {
+        this(true);
+    }
 
-	@Override
-	public final boolean check(String command, TwitchUser user)
-	{
-		if (active && user.getUserType().value >= USER_TYPE.MOD.value)
-		{
-			return true;
-		}
-		return iCheck(command, user);
-	}
+    public AbstractFreeForMod(boolean active) {
+        this.active = active;
+    }
 
-	@Override
-	public final void apply(String command, TwitchUser user)
-	{
-		if (active && user.getUserType().value >= USER_TYPE.MOD.value)
-		{
-			return;
-		}
-		iApply(command, user);
-	}
+    @Override
+    public final boolean check(String command, TwitchUser user) {
+        if (active && user.getUserType().value >= USER_TYPE.MOD.value) {
+            return true;
+        }
+        return iCheck(command, user);
+    }
 
-	public abstract boolean iCheck(String command, TwitchUser user);
+    @Override
+    public final void apply(String command, TwitchUser user) {
+        if (active && user.getUserType().value >= USER_TYPE.MOD.value) {
+            return;
+        }
+        iApply(command, user);
+    }
 
-	protected abstract void iApply(String command, TwitchUser user);
+    public abstract boolean iCheck(String command, TwitchUser user);
+
+    protected abstract void iApply(String command, TwitchUser user);
 }

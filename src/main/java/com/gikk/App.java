@@ -2,30 +2,27 @@ package com.gikk;
 
 import java.util.Scanner;
 
-public class App
-{
-	public static void main(String[] args)
-	{
-		SchedulerSingleton.INTERNAL.INIT();
-		Chat.INTERNAL.INIT();
+public class App {
 
-		System.out.println("Welcome to this Bot example. In this example you will be able \n"
-			+ "to send and receive messages from a Twitch chat channel. You will \n"
-			+ "make all input directly here in the command prompt. \n"
-			+ "I hope you set the credentials in the SystemConfig.java file ^.^\n\n"
-			+ "Type .quite to end the example. \n\n");
+    public static void main(String[] args) {
+        SchedulerSingleton.INTERNAL.INIT();
+        ChatSingleton.INTERNAL.INIT();
 
-		//As long as we don't type .quit into the command prompt, send everything we type as a message to twitch
-		try (Scanner scanner = new Scanner(System.in))
-		{
-			String line;
-			while (!(line = scanner.nextLine()).matches(".quit"))
-			{
-				Chat.GET().broadcast(line);
-			}
-		}
+        System.out.println("Welcome to this Bot example. In this example you will be able \n"
+                + "to send and receive messages from a Twitch chat channel. You will \n"
+                + "make all input directly here in the command prompt. \n"
+                + "I hope you set the credentials in the SystemConfig.java file ^.^\n\n"
+                + "Type .quite to end the example. \n\n");
 
-		Chat.INTERNAL.QUIT();
-		SchedulerSingleton.INTERNAL.QUIT();
-	}
+        //As long as we don't type .quit into the command prompt, send everything we type as a message to twitch
+        try (Scanner scanner = new Scanner(System.in)) {
+            String line;
+            while (!(line = scanner.nextLine()).matches(".quit")) {
+                ChatSingleton.GET().broadcast(line);
+            }
+        }
+
+        ChatSingleton.INTERNAL.QUIT();
+        SchedulerSingleton.INTERNAL.QUIT();
+    }
 }
