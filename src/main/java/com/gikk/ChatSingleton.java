@@ -252,7 +252,7 @@ public class ChatSingleton {
             // Call all commands that listens to this keyword
             for (AbstractChatCommand cmd : chatCommands) {
                 if (cmd.getCommandWords().contains(command)) {
-                    cmd.act(command, twitchUser, content, twitchMessage.getEmotes());
+                    cmd.act(command, twitchUser, content, twitchMessage.getEmotes(), twitchMessage.getTagMap());
                 }
             }
         }

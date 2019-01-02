@@ -2,6 +2,7 @@ package com.gikk.chat;
 
 import com.gikk.ChatSingleton;
 import com.gikk.chat.conditions.ICondition;
+import com.gikk.twirk.types.TagMap;
 import com.gikk.twirk.types.emote.Emote;
 import com.gikk.twirk.types.users.TwitchUser;
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ public abstract class AbstractChatCommand {
      * This method is the commands execution.
      *
      */
-    public final void act(String command, TwitchUser sender, String content, List<Emote> emotes) {
+    public final void act(String command, TwitchUser sender, String content, List<Emote> emotes, TagMap tagMap) {
         // Check if this request passes the required conditions
         // If it doesn't, send appropriate reply (if any) and return
         for (ICondition condition : conditions) {
@@ -37,7 +38,7 @@ public abstract class AbstractChatCommand {
         }
 
         // Now execute the actual command
-        boolean success = performCommand(command, sender, content, emotes);
+        boolean success = performCommand(command, sender, content, emotes, tagMap);
 
         if (success) {
             // If command executed successfully, apply the conditions
@@ -93,8 +94,9 @@ public abstract class AbstractChatCommand {
      * @param command The pattern that caused us to fire this command
      * @param sender The IrcUser who issued the command
      * @param content The rest of the message
-     * @return {@code true} if the command performed its duty, {@code false} if
+     * @param tagMap
+	 * @return {@code true} if the command performed its duty, {@code false} if
      * not
      */
-    public abstract boolean performCommand(String command, TwitchUser sender, String content, List<Emote> emotes);
+    public abstract boolean performCommand(String command, TwitchUser sender, String content, List<Emote> emotes, TagMap tagMap);
 }

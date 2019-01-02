@@ -4,6 +4,7 @@ import com.gikk.ChatSingleton;
 import com.gikk.SystemConfig;
 import com.gikk.chat.AbstractChatCommand;
 import com.gikk.chat.conditions.CooldownPerUser;
+import com.gikk.twirk.types.TagMap;
 import com.gikk.twirk.types.emote.Emote;
 import com.gikk.twirk.types.users.TwitchUser;
 import java.util.Arrays;
@@ -41,7 +42,7 @@ public class QuoteCommand extends AbstractChatCommand {
     }
 
     @Override
-    public boolean performCommand(String command, TwitchUser sender, String content, List<Emote> emotes) {
+    public boolean performCommand(String command, TwitchUser sender, String content, List<Emote> emotes, TagMap tagMap) {
         switch (command) {
             case COMMAND_GET:
                 return commandGet(content);

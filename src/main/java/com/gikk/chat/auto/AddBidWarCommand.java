@@ -5,6 +5,7 @@ import com.gikk.chat.AbstractChatCommand;
 import com.gikk.chat.conditions.CooldownPerCommand;
 import com.gikk.chat.conditions.IsModerator;
 import com.gikk.chat.manual.BidWarCommand;
+import com.gikk.twirk.types.TagMap;
 import com.gikk.twirk.types.emote.Emote;
 import com.gikk.twirk.types.users.TwitchUser;
 import java.util.HashSet;
@@ -35,7 +36,7 @@ public class AddBidWarCommand extends AbstractChatCommand {
     }
 
     @Override
-    public boolean performCommand(String command, TwitchUser sender, String content, List<Emote> emotes) {
+    public boolean performCommand(String command, TwitchUser sender, String content, List<Emote> emotes, TagMap tagMap) {
         if (bidOngoing) {
             return false;
         }
