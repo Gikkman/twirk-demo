@@ -1,6 +1,6 @@
 package com.gikk.chat;
 
-import com.gikk.ChatSingleton;
+import com.gikk.ChatService;
 import com.gikk.chat.conditions.ICondition;
 import com.gikk.twirk.types.emote.Emote;
 import com.gikk.twirk.types.users.TwitchUser;
@@ -16,8 +16,12 @@ public abstract class AbstractChatCommand {
     //***********************************************************************************************
     //											VARIABLES
     //***********************************************************************************************
-
+    protected final ChatService chatService;
     private final List<ICondition> conditions = new ArrayList<>();
+    
+    protected AbstractChatCommand(ChatService chatService) {
+        this.chatService = chatService;
+    }
 
     //***********************************************************************************************
     //											PUBLIC
@@ -31,7 +35,7 @@ public abstract class AbstractChatCommand {
         // If it doesn't, send appropriate reply (if any) and return
         for (ICondition condition : conditions) {
             if (condition.check(command, sender) == false) {
-                condition.getResponse(command, sender).ifPresent(ChatSingleton.GET()::broadcast);
+                condition.getResponse(command, sender).ifPresent(chatService::broadcast);
                 return;
             }
         }

@@ -1,6 +1,6 @@
 package com.gikk.chat.auto;
 
-import com.gikk.ChatSingleton;
+import com.gikk.ChatService;
 import com.gikk.chat.AbstractChatCommand;
 import com.gikk.chat.conditions.IsOwner;
 import com.gikk.twirk.types.emote.Emote;
@@ -14,7 +14,8 @@ public class PraiseBroadcasterCommand extends AbstractChatCommand {
     private static final String COMMAND = "!owner";
     private final Set<String> commandWords = new HashSet<>();
 
-    public PraiseBroadcasterCommand() {
+    public PraiseBroadcasterCommand(ChatService chatService) {
+        super(chatService);
         addCondition(new IsOwner());
         commandWords.add(COMMAND);
     }
@@ -26,7 +27,7 @@ public class PraiseBroadcasterCommand extends AbstractChatCommand {
 
     @Override
     public boolean performCommand(String command, TwitchUser sender, String content, List<Emote> emotes) {
-        ChatSingleton.GET().broadcast("Praise be " + sender.getDisplayName());
+        chatService.broadcast("Praise be " + sender.getDisplayName());
         return true;
     }
 }

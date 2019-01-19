@@ -1,6 +1,6 @@
 package com.gikk.chat.auto;
 
-import com.gikk.ChatSingleton;
+import com.gikk.ChatService;
 import com.gikk.chat.AbstractChatCommand;
 import com.gikk.chat.conditions.CooldownPerCommand;
 import com.gikk.twirk.types.emote.Emote;
@@ -17,7 +17,8 @@ public class BiggestLoserCommand extends AbstractChatCommand {
 
     private final Set<String> COMMAND = new HashSet<>();
 
-    public BiggestLoserCommand() {
+    public BiggestLoserCommand(ChatService chatService) {
+        super(chatService);
         COMMAND.add("!biggestloser");
         addCondition(new CooldownPerCommand(60 * 1000));
     }
@@ -30,7 +31,7 @@ public class BiggestLoserCommand extends AbstractChatCommand {
     @Override
     public boolean performCommand(String command, TwitchUser sender, String content, List<Emote> emotes) {
         String out = "You, " + sender.getDisplayName() + ", is the biggest loser. Sorry Kappa";
-        ChatSingleton.GET().broadcast(out);
+        chatService.broadcast(out);
         return true;
     }
 }

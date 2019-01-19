@@ -1,7 +1,8 @@
 package com.gikk.chat.auto;
 
-import com.gikk.ChatSingleton;
+import com.gikk.ChatService;
 import com.gikk.chat.AbstractChatCommand;
+import com.gikk.chat.ChatCommandFactoryService;
 import com.gikk.chat.conditions.CooldownPerCommand;
 import com.gikk.chat.conditions.IsModerator;
 import com.gikk.chat.manual.BidWarCommand;
@@ -18,12 +19,16 @@ import java.util.Set;
 public class AddBidWarCommand extends AbstractChatCommand {
 
     private static final String COMMAND = "!bidwar";
+    private final ChatCommandFactoryService chatCommandFactoryService;
     private final Set<String> commandWords = new HashSet<>();
 
     private boolean bidOngoing = false;
-    private AbstractChatCommand bidCommand = null;
+    private BidWarCommand bidCommand = null;
 
-    public AddBidWarCommand() {
+    public AddBidWarCommand(ChatService chatService, ChatCommandFactoryService chatCommandFactoryService) {
+        super(chatService);
+        this.chatCommandFactoryService = chatCommandFactoryService;
+        
         commandWords.add(COMMAND);
         addCondition(new IsModerator());
         addCondition(new CooldownPerCommand(30 * 1000));
@@ -40,19 +45,22 @@ public class AddBidWarCommand extends AbstractChatCommand {
             return false;
         }
         if (content.isEmpty()) {
-            ChatSingleton.GET().broadcast("Usage: " + COMMAND + " <PRIZE>");
+            chatService.broadcast("Usage: " + COMMAND + " <PRIZE>");
             return false;
         }
-
         bidOngoing = true;
-        bidCommand = new BidWarCommand(this::endBidWar);
-        ChatSingleton.GET().broadcast("A bidwar has started! Prize: " + content + ". To place your bid, type !bid <amount>");
-        ChatSingleton.GET().addChatCommand(bidCommand);
+        
+        bidCommand = chatCommandFactoryService.create(BidWarCommand.class);
+        bidCommand.setOnEnd(this::endBidWar);
+        
+        chatService.broadcast("A bidwar has started! Prize: " + content + ". To place your bid, type !bid <amount>");
+        chatService.addChatCommand(bidCommand);
+        
         return true;
     }
 
     public void endBidWar() {
-        ChatSingleton.GET().removeChatCommand(bidCommand);
+        chatService.removeChatCommand(bidCommand);
         bidCommand = null;
         bidOngoing = false;
     }

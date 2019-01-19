@@ -1,6 +1,6 @@
 package com.gikk.chat.auto;
 
-import com.gikk.ChatSingleton;
+import com.gikk.ChatService;
 import com.gikk.SystemConfig;
 import com.gikk.chat.AbstractChatCommand;
 import com.gikk.chat.conditions.CooldownPerUser;
@@ -27,10 +27,12 @@ public class QuoteCommand extends AbstractChatCommand {
     private final Set<String> commandWords = new HashSet<>();
     private final String currency;
 
-    public QuoteCommand() {
+    public QuoteCommand(ChatService chatService, SystemConfig systemConfig) {
+        super(chatService);
+        this.currency = systemConfig.getCurrency();
+        
         commandWords.add(COMMAND_GET);
         commandWords.add(COMMAND_ADD);
-        currency = SystemConfig.CURRENCY;
 
         addCondition(new CooldownPerUser(60 * 1000));
     }
@@ -56,7 +58,7 @@ public class QuoteCommand extends AbstractChatCommand {
         try {
             Integer index = Integer.parseInt(content);
             if (quoteMap.containsKey(index)) {
-                ChatSingleton.GET().broadcast(quoteMap.get(index));
+                chatService.broadcast(quoteMap.get(index));
                 return true;
             } else {
                 return false;
@@ -107,11 +109,11 @@ public class QuoteCommand extends AbstractChatCommand {
 
         int idx = quoteMap.size() + 1;
         quoteMap.put(idx, quote + " by " + saidByString);
-        ChatSingleton.GET().broadcast(sender, "Quote added as #" + idx);
+        chatService.broadcast(sender, "Quote added as #" + idx);
         return true;
     }
 
     private void showAddUsage() {
-        ChatSingleton.GET().broadcast("Usage: " + COMMAND_ADD + "<USER> <QUOTE>");
+        chatService.broadcast("Usage: " + COMMAND_ADD + "<USER> <QUOTE>");
     }
 }

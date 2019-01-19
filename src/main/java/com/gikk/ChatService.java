@@ -1,14 +1,6 @@
 package com.gikk;
 
 import com.gikk.chat.AbstractChatCommand;
-import com.gikk.chat.auto.AddBidWarCommand;
-import com.gikk.chat.auto.AmSubCommand;
-import com.gikk.chat.auto.BiggestLoserCommand;
-import com.gikk.chat.auto.CommandsCommand;
-import com.gikk.chat.auto.DiceGameCommand;
-import com.gikk.chat.auto.PraiseBroadcasterCommand;
-import com.gikk.chat.auto.QuoteCommand;
-import com.gikk.chat.listener.TimedMessages;
 import com.gikk.twirk.Twirk;
 import com.gikk.twirk.TwirkBuilder;
 import com.gikk.twirk.events.TwirkListener;
@@ -21,43 +13,51 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-public class ChatSingleton {
+@Service
+public class ChatService {
 
     private final Set<AbstractChatCommand> chatCommands = ConcurrentHashMap.newKeySet();
+    private final SystemConfig systemConfig;
     private Twirk twirk;
 
-    private ChatSingleton() {
+    @Autowired
+    private ChatService(SystemConfig systemConfig) {
+        this.systemConfig = systemConfig;
         try {
             twirk = createTwirkInstance();
         } catch (IOException ex) {
             Log.error("Chat setup exception", ex);
             System.exit(-1);
         }
-
-        addChatCommand(new AddBidWarCommand());
-        addChatCommand(new AmSubCommand());
-        addChatCommand(new BiggestLoserCommand());
-        addChatCommand(new CommandsCommand());
-        addChatCommand(new DiceGameCommand());
-        addChatCommand(new PraiseBroadcasterCommand());
-        addChatCommand(new QuoteCommand());
+    }
+    
+    @PostConstruct
+    private void postConstruct() {
+        try {
+            twirk.connect();
+        } catch (IOException ex) {
+            Logger.getLogger(ChatService.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(ChatService.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    @PreDestroy
+    private void preDestroy() {
+        twirk.close();
     }
 
-    /**
-     * *************************************************************************
+    /* *************************************************************************
      * CHAT INTERACTION
-	 *************************************************************************
-     */
-    /**
-     * Fetches the ChatSingleton singleton object
-     *
-     * @return the ChatSingleton
-     */
-    public static ChatSingleton GET() {
-        return INTERNAL.INSTANCE;
-    }
+     **************************************************************************/
 
     /**
      * Broadcasts a message in the connected chat channel
@@ -100,6 +100,10 @@ public class ChatSingleton {
      */
     public final synchronized boolean addChatCommand(AbstractChatCommand command) {
         return chatCommands.add(command);
+    }
+    
+    public final synchronized  void addIrcListener(TwirkListener listener) {
+        twirk.addIrcListener(listener);
     }
 
     /**
@@ -187,41 +191,17 @@ public class ChatSingleton {
 
     private Twirk createTwirkInstance() throws IOException {
         // Add a hashtag to the channel, if the writer had forgotten it
-        String channel = SystemConfig.BOT_CHANNEL.startsWith("#") ? SystemConfig.BOT_CHANNEL : "#" + SystemConfig.BOT_CHANNEL;
+        String channel = systemConfig.getChannel();
+        channel = channel.startsWith("#") ? channel : "#" + channel;
 
         // Connect to IRC chat
-        Twirk t = new TwirkBuilder(channel, SystemConfig.BOT_USER, SystemConfig.BOT_PASSWORD)
+        Twirk t = new TwirkBuilder(channel, systemConfig.getUsername(), systemConfig.getPassword())
                 .setVerboseMode(true)
                 .build();
 
         t.addIrcListener(new InternalListerenr());
-        t.addIrcListener(new TimedMessages());
 
         return t;
-    }
-
-    /**
-     * *************************************************************************
-     * SINGLETON INTENRALS
-	 *************************************************************************
-     */
-    static class INTERNAL {
-
-        private static final ChatSingleton INSTANCE = new ChatSingleton();
-
-        static void INIT() {
-            try {
-                INSTANCE.twirk.connect();
-            } catch (IOException ex) {
-                Log.error("IOException connection to Twitch chat", ex.getMessage());
-            } catch (InterruptedException ex) {
-                Log.error("Iterrupted while connecting to Twitch chat", ex.getMessage());
-            }
-        }
-
-        static void QUIT() {
-            INSTANCE.twirk.close();
-        }
     }
 
     /**

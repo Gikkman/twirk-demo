@@ -1,11 +1,35 @@
 package com.gikk;
 
-public class SystemConfig {
-    // Find a better way of serving / storing passwords. Don't version control secrets.
-    // Also, get a bot password here: https://twitchapps.com/tmi/
-    public static final String BOT_PASSWORD = "";
-    public static final String BOT_CHANNEL = "";
-    public static final String BOT_USER = "";
+import javax.validation.constraints.NotBlank;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
-    public static final String CURRENCY = "COIN";
+@Configuration
+@ConfigurationProperties(prefix = "bot")
+public class SystemConfig {
+
+    @NotBlank
+    public String password;
+    @NotBlank
+    public String channel;
+    @NotBlank
+    public String username;
+    @NotBlank
+    public String currency;
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getChannel() {
+        return channel;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
 }

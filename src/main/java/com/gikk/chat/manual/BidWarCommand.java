@@ -1,7 +1,7 @@
 package com.gikk.chat.manual;
 
-import com.gikk.ChatSingleton;
-import com.gikk.SchedulerSingleton;
+import com.gikk.ChatService;
+import com.gikk.SchedulerService;
 import com.gikk.SystemConfig;
 import com.gikk.chat.AbstractChatCommand;
 import com.gikk.chat.conditions.CooldownPerUser;
@@ -22,9 +22,10 @@ public class BidWarCommand extends AbstractChatCommand {
 
     private final static String COMMAND = "!bid";
     private final Set<String> commandWords = new HashSet<>();
+    private final SchedulerService schedulerService;
     private final String currency;
 
-    private final Runnable onEnd;
+    private Runnable onEnd;
 
     // Start at -15 to give it 15 seconds before it
     // starts calling potential winners
@@ -32,12 +33,17 @@ public class BidWarCommand extends AbstractChatCommand {
     private Future future = null;
     private Touple<TwitchUser, Long> highestBid = null;
 
-    public BidWarCommand(Runnable onEnd) {
+    public BidWarCommand(ChatService chatService, SchedulerService schedulerService, SystemConfig systemConfig) {
+        super(chatService);
+        this.schedulerService = schedulerService;
+        this.currency = systemConfig.getCurrency();
         commandWords.add(COMMAND);
-        currency = SystemConfig.CURRENCY;
-
-        this.onEnd = onEnd;
+        
         addCondition(new CooldownPerUser(500));
+    }
+    
+    public void setOnEnd(Runnable onEnd) {
+        this.onEnd = onEnd;
     }
 
     @Override
@@ -53,14 +59,14 @@ public class BidWarCommand extends AbstractChatCommand {
             Double dBid = Double.parseDouble(amount);   //Not safe if people write bogus
             bid = dBid.longValue();
         } catch (Exception ex) {
-            ChatSingleton.GET().broadcast(sender, "Could not parse a valid number from "
+            chatService.broadcast(sender, "Could not parse a valid number from "
                     + "your bid attempt DansGame");
             return false;
         }
         long senderBalance = 100L; // If you store balances somewhere, get them here
 
         if (senderBalance < bid) {
-            ChatSingleton.GET().broadcast(sender, "You can't afford your bid of " + bid
+            chatService.broadcast(sender, "You can't afford your bid of " + bid
                     + " with your current "
                     + senderBalance + " " + currency
                     + " DansGame");
@@ -76,7 +82,7 @@ public class BidWarCommand extends AbstractChatCommand {
 
     private void resetBidCallouts() {
         if (future == null) {
-            future = SchedulerSingleton.GET().repeatedTask(1000, 1000, this::tick);
+            future = schedulerService.repeatedTask(1000, 1000, this::tick);
         }
         // Since timer starts at -15, we let those first 15 seconds run no matter what
         if (seconds.get() > 0) {
@@ -92,7 +98,7 @@ public class BidWarCommand extends AbstractChatCommand {
         if (highestBid == null) {
             if (currentSecond == 15) {
                 future.cancel(false);
-                ChatSingleton.GET().broadcast("No bids were entered in 45 seconds. "
+                chatService.broadcast("No bids were entered in 45 seconds. "
                         + "Shutting down bid war");
                 onEnd.run();
             } else {
@@ -109,14 +115,14 @@ public class BidWarCommand extends AbstractChatCommand {
         }
 
         if (currentSecond == 5) {
-            ChatSingleton.GET().broadcast(bid + " " + currency + " from "
+            chatService.broadcast(bid + " " + currency + " from "
                     + leader.getDisplayName() + "!"
                     + " Going once! PogChamp");
         } else if (currentSecond == 10) {
-            ChatSingleton.GET().broadcast("Gooooing twice! PogChamp PogChamp PogChamp");
+            chatService.broadcast("Gooooing twice! PogChamp PogChamp PogChamp");
         } else if (currentSecond == 15) {
             future.cancel(false);
-            ChatSingleton.GET().broadcast("SOLD!!! FeelsRareMan With a winning bid of "
+            chatService.broadcast("SOLD!!! FeelsRareMan With a winning bid of "
                     + bid + " " + currency + ", "
                     + leader.getDisplayName() + " is our winner! FeelsRareMan");
             onEnd.run();

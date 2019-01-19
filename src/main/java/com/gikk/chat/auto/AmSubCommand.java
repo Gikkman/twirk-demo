@@ -1,6 +1,6 @@
 package com.gikk.chat.auto;
 
-import com.gikk.ChatSingleton;
+import com.gikk.ChatService;
 import com.gikk.chat.AbstractChatCommand;
 import com.gikk.chat.conditions.CooldownPerUser;
 import com.gikk.twirk.types.emote.Emote;
@@ -14,7 +14,8 @@ public class AmSubCommand extends AbstractChatCommand {
     private static final String COMMAND = "!amsub";
     private final Set<String> commandWords = new HashSet<>();
 
-    public AmSubCommand() {
+    public AmSubCommand(ChatService chatService) {
+        super(chatService);
         addCondition(new CooldownPerUser(30 * 60 * 1000)); // 30 minutes
         commandWords.add(COMMAND);
     }
@@ -27,9 +28,9 @@ public class AmSubCommand extends AbstractChatCommand {
     @Override
     public boolean performCommand(String command, TwitchUser sender, String content, List<Emote> emotes) {
         if (sender.isSub() || sender.isTurbo()) {
-            ChatSingleton.GET().broadcast("Yeah! You are a sub! Best viewer there, " + sender.getDisplayName());
+            chatService.broadcast("Yeah! You are a sub! Best viewer there, " + sender.getDisplayName());
         } else {
-            ChatSingleton.GET().broadcast("Na, just a normie there, " + sender.getDisplayName());
+            chatService.broadcast("Na, just a normie there, " + sender.getDisplayName());
         }
         return true;
     }

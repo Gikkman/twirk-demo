@@ -1,6 +1,6 @@
 package com.gikk.chat.auto;
 
-import com.gikk.ChatSingleton;
+import com.gikk.ChatService;
 import com.gikk.chat.AbstractChatCommand;
 import com.gikk.chat.conditions.CooldownPerCommand;
 import com.gikk.chat.conditions.IsModerator;
@@ -16,7 +16,8 @@ public class CommandsCommand extends AbstractChatCommand {
 
     private final Set<String> commandWords = new HashSet<>();
 
-    public CommandsCommand() {
+    public CommandsCommand(ChatService chatService) {
+        super(chatService);
         addCondition(new CooldownPerCommand(5 * 1000)); // 5 seconds
         addCondition(new IsModerator());
         commandWords.add(COMMAND);
@@ -29,7 +30,7 @@ public class CommandsCommand extends AbstractChatCommand {
 
     @Override
     public boolean performCommand(String command, TwitchUser sender, String content, List<Emote> emotes) {
-        ChatSingleton.GET().broadcast(ChatSingleton.GET().getKeywords());
+        chatService.broadcast(chatService.getKeywords());
         return true;
     }
 }

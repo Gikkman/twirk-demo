@@ -1,7 +1,7 @@
 package com.gikk.chat.listener;
 
-import com.gikk.ChatSingleton;
-import com.gikk.SchedulerSingleton;
+import com.gikk.ChatService;
+import com.gikk.SchedulerService;
 import com.gikk.twirk.events.TwirkListener;
 import com.gikk.twirk.types.twitchMessage.TwitchMessage;
 import com.gikk.twirk.types.users.TwitchUser;
@@ -9,11 +9,15 @@ import java.util.Collections;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  *
  * @author Gikkman
  */
+@Service
 public class TimedMessages implements TwirkListener {
     // Make sure you got at least two messages here, or this will break
 
@@ -22,6 +26,7 @@ public class TimedMessages implements TwirkListener {
         "This is a timed message"
     };
 
+    private final ChatService chatService;
     private final Random rng = new Random();
     private final Set<Long> seen = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private int chatCount = 0;
@@ -29,8 +34,15 @@ public class TimedMessages implements TwirkListener {
     private long lastMessage = System.currentTimeMillis();
     private int previousIndex = -1;
 
-    public TimedMessages() {
-        SchedulerSingleton.GET().repeatedTask(5 * 60 * 1000, 5 * 60 * 1000, this::tryToSend);
+    @Autowired
+    public TimedMessages(ChatService chatService, SchedulerService schedulerService) {
+        this.chatService = chatService;
+        schedulerService.repeatedTask(5 * 60 * 1000, 5 * 60 * 1000, this::tryToSend);
+    }
+    
+    @PostConstruct
+    private void postConstruct() {
+        chatService.addIrcListener(this);
     }
 
     @Override
@@ -47,7 +59,7 @@ public class TimedMessages implements TwirkListener {
             int messageIndex = getRandomIndex();
             String message = MESSAGES[messageIndex];
 
-            ChatSingleton.GET().broadcast(message);
+            chatService.broadcast(message);
             previousIndex = messageIndex;
 
             seen.clear();

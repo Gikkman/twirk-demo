@@ -11,12 +11,15 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
+import javax.annotation.PreDestroy;
+import org.springframework.stereotype.Service;
 
 /**
  *
  * @author Gikkman
  */
-public class SchedulerSingleton {
+@Service
+public class SchedulerService {
 
     /**
      * *************************************************************************
@@ -32,9 +35,18 @@ public class SchedulerSingleton {
      * CONSTRUCTOR
 	 *************************************************************************
      */
-    private SchedulerSingleton() {
+    private SchedulerService() {
         scheduler = new SchedulerBuilder(3).setThreadsPrefix("Scheduler-").setThreadsDaemon(true).build();
         repeatedTask(1000, 1000, this::tickAction);
+    }
+    
+    @PreDestroy
+    private void preDestroy() {
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException ignored) {
+        }
+        scheduler.terminate();
     }
 
     private static Runnable tryCatchWrap(Runnable task) {
@@ -47,20 +59,10 @@ public class SchedulerSingleton {
         };
     }
 
-    /**
-     * Fetches the Chat singleton object
-     *
-     * @return the Chat
-     */
-    public static SchedulerSingleton GET() {
-        return INTERNAL.INSTANCE;
-    }
-
-    /**
-     * *************************************************************************
+    /* *************************************************************************
      * TASK MANAGEMENT
-	 *************************************************************************
-     */
+    ***************************************************************************/
+     
     public final Future executeTask(Runnable task) {
         if (scheduler.isDisposed()) {
             return null;
@@ -75,11 +77,9 @@ public class SchedulerSingleton {
         return scheduler.scheduleDelayedTask(delayMillis, tryCatchWrap(task));
     }
 
-    /**
-     * *************************************************************************
+    /* *************************************************************************
      * TICK MANAGEMENT
-	 *************************************************************************
-     */
+     **************************************************************************/
     public final Future repeatedTask(int initialDelayMillis, int periodMillis, Runnable task) {
         if (scheduler.isDisposed()) {
             return null;
@@ -88,7 +88,7 @@ public class SchedulerSingleton {
     }
 
     /**
-     * Adds a runnable to the Tick-batch. Runnables in the Tick-batch are
+     * Adds a runnable to the Tick-batch. A Runnable in the Tick-batch are
      * executed every 1000 ms
      *
      * @param identifier name for the runnable
@@ -126,25 +126,8 @@ public class SchedulerSingleton {
             }
         }
 
-        for (Touple<String, Runnable> t : oldQueue) {
+        oldQueue.forEach((t) -> {
             permanentOnTick.put(t.left, t.right);
-        }
-    }
-
-    static class INTERNAL {
-
-        private static final SchedulerSingleton INSTANCE = new SchedulerSingleton();
-
-        static void INIT() {
-            //Just to run the constructor
-        }
-
-        static void QUIT() {
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException ignored) {
-            }
-            INSTANCE.scheduler.terminate();
-        }
+        });
     }
 }

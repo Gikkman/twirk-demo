@@ -1,6 +1,6 @@
 package com.gikk.chat.auto;
 
-import com.gikk.ChatSingleton;
+import com.gikk.ChatService;
 import com.gikk.SystemConfig;
 import com.gikk.chat.AbstractChatCommand;
 import com.gikk.chat.conditions.CooldownPerCommand;
@@ -30,10 +30,13 @@ public class DiceGameCommand extends AbstractChatCommand {
         PAYOUTS.put(12, 15);
     }
 
-    private final String currency = SystemConfig.CURRENCY;
+    private final String currency;
     private final Set<String> commandWords = new HashSet<>();
 
-    public DiceGameCommand() {
+    public DiceGameCommand(ChatService chatService, SystemConfig systemConfig) {
+        super(chatService);
+        this.currency = systemConfig.getCurrency();
+        
         commandWords.add(COMMAND);
         addCondition(new CooldownPerCommand(COOLDOWN_MILLIS));
     }
@@ -53,7 +56,7 @@ public class DiceGameCommand extends AbstractChatCommand {
             int d2 = rng.nextInt(6) + 1;
 
             Integer winMultiplier = PAYOUTS.get(d1 + d2);
-            ChatSingleton.GET().broadcast(sender, "You won " + winMultiplier * wagerSum + " " + currency);
+            chatService.broadcast(sender, "You won " + winMultiplier * wagerSum + " " + currency);
 
             return true;
         } catch (Exception e) {
