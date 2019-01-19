@@ -31,13 +31,15 @@ public class TimedMessages implements TwirkListener {
     private final Set<Long> seen = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private int chatCount = 0;
 
-    private long lastMessage = System.currentTimeMillis();
+    private long lastMessage = 0;
     private int previousIndex = -1;
 
     @Autowired
     public TimedMessages(ChatService chatService, SchedulerService schedulerService) {
         this.chatService = chatService;
-        schedulerService.repeatedTask(5 * 60 * 1000, 5 * 60 * 1000, this::tryToSend);
+        
+        // First message after 30 seconds, then once per 5 minutes
+        schedulerService.repeatedTask(30 * 1000, 5 * 60 * 1000, this::tryToSend);
     }
     
     @PostConstruct
@@ -53,7 +55,7 @@ public class TimedMessages implements TwirkListener {
 
     private void tryToSend() {
         long millisSinceLastMessage = System.currentTimeMillis() - lastMessage;
-        if ((seen.size() > 5 || chatCount > 30) && millisSinceLastMessage > 30 * 60 * 1000) {
+        if ((seen.size() >= 1 || chatCount >= 5) && millisSinceLastMessage > 30 * 60 * 1000) {
             lastMessage = System.currentTimeMillis();
 
             int messageIndex = getRandomIndex();

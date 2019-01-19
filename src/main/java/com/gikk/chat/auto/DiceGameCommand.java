@@ -55,7 +55,7 @@ public class DiceGameCommand extends AbstractChatCommand {
             int d1 = rng.nextInt(6) + 1; // RNG 1-6 (inclusive)
             int d2 = rng.nextInt(6) + 1;
 
-            Integer winMultiplier = PAYOUTS.get(d1 + d2);
+            Integer winMultiplier = PAYOUTS.getOrDefault(d1 + d2, 0);
             chatService.broadcast(sender, "You won " + winMultiplier * wagerSum + " " + currency);
 
             return true;

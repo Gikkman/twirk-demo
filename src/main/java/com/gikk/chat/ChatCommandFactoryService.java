@@ -15,6 +15,7 @@ import com.gikk.chat.auto.CommandsCommand;
 import com.gikk.chat.auto.DiceGameCommand;
 import com.gikk.chat.auto.PraiseBroadcasterCommand;
 import com.gikk.chat.auto.QuoteCommand;
+import com.gikk.chat.manual.BidWarCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -50,6 +51,8 @@ public class ChatCommandFactoryService {
             return (T) new PraiseBroadcasterCommand(chatService);
         else if(QuoteCommand.class.equals(type))
             return (T) new QuoteCommand(chatService, systemConfig);
+        else if(BidWarCommand.class.equals(type))
+            return (T) new BidWarCommand(chatService, schedulerService, systemConfig);
         else
             throw new RuntimeException("No factory configured for class " + type);
     }
