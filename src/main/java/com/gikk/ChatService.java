@@ -95,8 +95,7 @@ public class ChatService {
      * Adds a chat command to the chat
      *
      * @param command the command
-     * @return {
-     * @true} if the command was added
+     * @return true if the command was added
      */
     public final synchronized boolean addChatCommand(AbstractChatCommand command) {
         return chatCommands.add(command);
@@ -110,8 +109,7 @@ public class ChatService {
      * Removes a chat command to the chat
      *
      * @param command the command
-     * @return {
-     * @true} if the command was removed
+     * @return true if the command was removed
      */
     public synchronized boolean removeChatCommand(AbstractChatCommand command) {
         return chatCommands.remove(command);

@@ -67,7 +67,7 @@ public class SchedulerBuilder {
      * Decides whether threads held by the {@link Scheduler} should be daemon
      * threads or not.
      *
-     * @param daemon If {@code true}, threads in the Scheduler will be daemon
+     * @param isDaemon If {@code true}, threads in the Scheduler will be daemon
      * threads.
      * @return This object. Allows for chaining setters and {@code .build()}
      */
